@@ -14,21 +14,18 @@ pub Expr: Expr = {
     LazyExpr,
 };
 
-pub LazyExpr: Expr = {
-    LazyExpr ExprOp Factor => Expr::new_op(<>),
-    Factor,
+LazyExpr = Tier<ExprOp, Factor>;
+Factor = Tier<FactorOp, Term>;
+
+Tier<Op, NextTier>: Expr = {
+    Tier<Op, NextTier> Op NextTier => Expr::new_op(<>),
+    NextTier,
 };
 
 ExprOp: OpCode = {
     "+" => OpCode::Add,
     "-" => OpCode::Sub,
 };
-
-Factor: Expr = {
-    Factor FactorOp Term => Expr::new_op(<>),
-    Term,
-};
-
 FactorOp: OpCode = {
     "*" => OpCode::Mul,
     "/" => OpCode::Div,
