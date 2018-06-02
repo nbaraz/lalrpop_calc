@@ -1,0 +1,15 @@
+[package]
+name = "lalrpop-calc"
+version = "0.1.0"
+authors = ["Noam Baraz <n0987b@gmail.com>"]
+
+[build-dependencies]
+lalrpop = "0.15.2"
+
+[dependencies]
+lalrpop-util = "0.15.2"
+regex = "0.2.1"
+
+[[bin]]
+name = "lal"
+path = "src/bin.rs"

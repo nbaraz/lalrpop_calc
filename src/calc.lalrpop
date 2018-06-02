@@ -1,0 +1,44 @@
+use std::str::FromStr;
+use ast::{Statement, Expr, OpCode};
+
+grammar;
+
+pub Statement: Statement = {
+    <p:Ident> "=" <e: Expr> => Statement::Assign(p, e),
+    <Expr> => Statement::Print(<>),
+    "?" <Expr> => Statement::Repr(<>),
+};
+
+pub Expr: Expr = {
+    "resolve" <Expr> => Expr::Resolve(Box::new(<>)),
+    LazyExpr,
+};
+
+pub LazyExpr: Expr = {
+    LazyExpr ExprOp Factor => Expr::new_op(<>),
+    Factor,
+};
+
+ExprOp: OpCode = {
+    "+" => OpCode::Add,
+    "-" => OpCode::Sub,
+};
+
+Factor: Expr = {
+    Factor FactorOp Term => Expr::new_op(<>),
+    Term,
+};
+
+FactorOp: OpCode = {
+    "*" => OpCode::Mul,
+    "/" => OpCode::Div,
+};
+
+pub Term: Expr = {
+    <Num> => Expr::Num(<>),
+    <Ident> => Expr::Ident(<>),
+    "(" <Expr> ")",
+};
+
+Num: i32 = <r"[0-9]+"> => i32::from_str(<>).unwrap();
+Ident: String = <r"[[:alpha:]]\w*"> => String::from(<>);
