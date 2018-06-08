@@ -41,63 +41,6 @@ impl Expr {
     pub fn new_op(a: Expr, op: OpCode, b: Expr) -> Expr {
         Expr::Op(Box::new(a), op, Box::new(b))
     }
-
-    pub fn resolve(&self, vars: &HashMap<String, Expr>) -> Result<i32, NameError> {
-        let mut resolving = HashSet::new();
-        self.resolve_inner(vars, &mut resolving)
-    }
-
-    fn resolve_inner<'this>(
-        &'this self,
-        vars: &'this HashMap<String, Expr>,
-        resolving: &mut HashSet<&'this str>,
-    ) -> Result<i32, NameError> {
-        match self {
-            Expr::Num(n) => Ok(*n),
-            Expr::Ident(name) => {
-                let existed = !resolving.insert(&name);
-                if existed {
-                    Err(NameError(format!("~~{}", name)))
-                } else {
-                    let res = vars
-                        .get(*&name)
-                        .ok_or_else(|| NameError(name.clone()))
-                        .and_then(|e| e.resolve_inner(vars, resolving));
-                    resolving.remove(name.as_str());
-                    res
-                }
-            }
-            Expr::Op(a, op, b) => Expr::resolve_binop(vars, resolving, a, *op, b),
-            Expr::Resolve(e) => e.resolve_inner(vars, resolving),
-        }
-    }
-
-    fn resolve_binop<'this>(
-        vars: &'this HashMap<String, Expr>,
-        resolving: &mut HashSet<&'this str>,
-        a: &'this Expr,
-        op: OpCode,
-        b: &'this Expr,
-    ) -> Result<i32, NameError> {
-        use std::ops::{Add, Div, Mul, Sub};
-
-        let a = a.resolve_inner(vars, resolving)?;
-        let b = b.resolve_inner(vars, resolving)?;
-
-        let func = match op {
-            OpCode::Add => Add::add,
-            OpCode::Sub => Sub::sub,
-            OpCode::Mul => Mul::mul,
-            OpCode::Div => {
-                if b == 0 {
-                    return Err(NameError("/0".to_owned()));
-                }
-                Div::div
-            }
-        };
-
-        Ok(func(a, b))
-    }
 }
 
 trait ExprVisitor {

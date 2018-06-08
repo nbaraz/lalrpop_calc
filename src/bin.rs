@@ -4,8 +4,9 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::io::{self, BufRead, BufReader};
 
+use lalrpop_calc::{ast, calc, execution};
 use ast::Statement;
-use lalrpop_calc::{ast, calc};
+use execution::resolve;
 
 fn main() -> Result<(), Box<Error>> {
     let stdin = io::stdin();
@@ -32,7 +33,7 @@ fn main() -> Result<(), Box<Error>> {
                 vars.insert(name, expr);
             }
             Statement::Print(expr) => {
-                match expr.resolve(&vars) {
+                match resolve(&expr, &vars) {
                     Ok(val) => {
                         println!("{}", val);
                     }

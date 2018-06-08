@@ -1,6 +1,7 @@
 extern crate lalrpop_util;
 
 pub mod ast;
+pub mod execution;
 pub mod calc; // synthesized by LALRPOP
 
 #[cfg(test)]
