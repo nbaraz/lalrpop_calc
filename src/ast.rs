@@ -42,22 +42,6 @@ impl Expr {
         Expr::Op(Box::new(a), op, Box::new(b))
     }
 
-    pub fn walk<T, F: FnMut(&Expr) -> Option<T>>(&self, f: &mut F) -> Option<T> {
-        match self {
-            Expr::Op(a, _, b) => a.walk(f).or_else(|| b.walk(f)),
-            Expr::Resolve(e) => e.walk(f),
-            _ => f(self),
-        }
-    }
-
-    pub fn walk_mut<T, F: FnMut(&mut Expr) -> Option<T>>(&mut self, f: &mut F) -> Option<T> {
-        match self {
-            Expr::Op(a, _, b) => a.walk_mut(f).or_else(|| b.walk_mut(f)),
-            Expr::Resolve(e) => e.walk_mut(f),
-            _ => f(self),
-        }
-    }
-
     pub fn resolve(&self, vars: &HashMap<String, Expr>) -> Result<i32, NameError> {
         let mut resolving = HashSet::new();
         self.resolve_inner(vars, &mut resolving)

@@ -19,21 +19,4 @@ mod tests {
         assert!(calc::TermParser::new().parse("((((22))))").is_ok());
         assert!(calc::TermParser::new().parse("((22)").is_err());
     }
-
-    #[test]
-    fn ident() {
-        assert!(calc::ExprParser::new().parse("22 + 33").is_ok());
-
-        let expr = calc::ExprParser::new().parse("aa + (22 * bb)").unwrap();
-        let mut v = Vec::new();
-        expr.walk(&mut |e| {
-            match e {
-                ast::Expr::Ident(s) => v.push(s.clone()),
-                _ => (),
-            };
-            None::<bool>
-        });
-        let set = HashSet::<String>::from_iter(v);
-        assert!(set.contains("aa") && set.contains("bb"));
-    }
 }
