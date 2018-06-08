@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::error::Error;
 use std::fmt;
 
 pub enum Statement {
@@ -154,23 +153,4 @@ impl<'a, 'b> fmt::Display for ReprExpr<'a, 'b> {
 
 pub fn repr_expr<'a, 'b>(expr: &'a Expr, vars: &'b HashMap<String, Expr>) -> ReprExpr<'a, 'b> {
     ReprExpr { expr, vars }
-}
-
-#[derive(Debug)]
-pub struct NameError(pub String);
-
-impl fmt::Display for NameError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "could not resolve `{}`", self.0)
-    }
-}
-
-impl Error for NameError {
-    fn description(&self) -> &str {
-        "identifier not defined"
-    }
-
-    fn cause(&self) -> Option<&Error> {
-        None
-    }
 }
