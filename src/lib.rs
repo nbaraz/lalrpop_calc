@@ -7,10 +7,6 @@ pub mod calc; // synthesized by LALRPOP
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-    use std::iter::FromIterator;
-
-    use ast;
     use calc;
 
 
