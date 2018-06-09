@@ -1,6 +1,7 @@
 extern crate lalrpop_calc;
 
 use std::collections::HashMap;
+use std::env;
 use std::error::Error;
 use std::io::{self, BufRead, BufReader};
 
@@ -8,10 +9,7 @@ use ast::Statement;
 use execution::{resolve, resolve_initial};
 use lalrpop_calc::{ast, calc, execution};
 
-fn main() -> Result<(), Box<Error>> {
-    let stdin = io::stdin();
-    let input = BufReader::new(stdin.lock());
-
+fn interpret_input<T: std::io::Read>(input: BufReader<T>) -> Result<(), Box<Error>> {
     let mut vars = HashMap::new();
     for line in input.lines() {
         let line = line?;
@@ -54,4 +52,16 @@ fn main() -> Result<(), Box<Error>> {
     }
 
     Ok(())
+}
+
+fn main() -> Result<(), Box<Error>> {
+    if let Some(f) = env::args().nth(1) {
+        println!("Executing lines from {}", f);
+        let input = BufReader::new(std::fs::File::open(f)?);
+        interpret_input(input)
+    } else {
+        let stdin = io::stdin();
+        let input = BufReader::new(stdin.lock());
+        interpret_input(input)
+    }
 }
