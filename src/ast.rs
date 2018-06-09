@@ -42,12 +42,12 @@ impl Expr {
     }
 }
 
-trait ExprVisitor {
+pub trait ExprVisitor {
     fn should_continue(&mut self) -> bool {
         true
     }
 
-    fn visit_expr(&mut self, expr: &mut Expr) {
+    fn super_expr(&mut self, expr: &mut Expr) {
         if !self.should_continue() {
             return;
         }
@@ -56,15 +56,19 @@ trait ExprVisitor {
             Expr::Num(num) => self.visit_num(num),
             Expr::Ident(ident) => self.visit_ident(ident),
             Expr::Op(a, op, b) => self.visit_op(a, op, b),
-            Expr::Resolve(expr) => self.visit_resolve(expr),
+            resolve @ Expr::Resolve(_) => self.visit_resolve(resolve),
         }
+    }
+
+    fn visit_expr(&mut self, expr: &mut Expr) {
+        self.super_expr(expr);
     }
 
     fn visit_num(&mut self, _num: &mut i32) {}
     fn visit_ident(&mut self, _ident: &mut String) {}
     fn visit_opcode(&mut self, _op: &mut OpCode) {}
 
-    fn visit_op(&mut self, a: &mut Expr, op: &mut OpCode, b: &mut Expr) {
+    fn super_op(&mut self, a: &mut Expr, op: &mut OpCode, b: &mut Expr) {
         self.visit_expr(a);
 
         if !self.should_continue() {
@@ -76,8 +80,19 @@ trait ExprVisitor {
         self.visit_expr(b);
     }
 
+    fn visit_op(&mut self, a: &mut Expr, op: &mut OpCode, b: &mut Expr) {
+        self.super_op(a, op, b);
+    }
+
+    fn super_resolve(&mut self, expr: &mut Expr) {
+        match expr {
+            Expr::Resolve(inner) => self.visit_expr(inner),
+            _ => panic!("Expected `Expr::Resolve`"),
+        }
+    }
+
     fn visit_resolve(&mut self, expr: &mut Expr) {
-        self.visit_expr(expr)
+        self.super_resolve(expr)
     }
 }
 
