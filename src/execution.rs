@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use ast::{Expr, OpCode};
+use ast::{Expr, ExprVisitor, OpCode};
 
 pub fn resolve(expr: &Expr, vars: &HashMap<String, Expr>) -> Result<i32, ExecError> {
     let mut resolving = HashSet::new();
@@ -75,4 +75,34 @@ pub enum ExecError {
         identifier: String,
         expr: Expr,
     },
+}
+
+pub fn resolve_initial(expr: &mut Expr, vars: &HashMap<String, Expr>) -> Result<(), ExecError> {
+    struct InitialResolver<'a> {
+        vars: &'a HashMap<String, Expr>,
+        result: Result<(), ExecError>,
+    };
+    impl<'a> ExprVisitor for InitialResolver<'a> {
+        fn should_continue(&mut self) -> bool {
+            self.result.is_ok()
+        }
+
+        fn visit_resolve(&mut self, expr: &mut Expr) {
+            match resolve(expr, self.vars) {
+                Ok(val) => {
+                    *expr = Expr::Num(val);
+                }
+                Err(e) => {
+                    self.result = Err(e);
+                }
+            }
+        }
+    }
+
+    let mut resolver = InitialResolver {
+        vars,
+        result: Ok(()),
+    };
+    resolver.visit_expr(expr);
+    resolver.result
 }

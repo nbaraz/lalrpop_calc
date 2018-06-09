@@ -4,9 +4,9 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::io::{self, BufRead, BufReader};
 
-use lalrpop_calc::{ast, calc, execution};
 use ast::Statement;
-use execution::resolve;
+use execution::{resolve, resolve_initial};
+use lalrpop_calc::{ast, calc, execution};
 
 fn main() -> Result<(), Box<Error>> {
     let stdin = io::stdin();
@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<Error>> {
             continue;
         }
 
-        let stmt = match calc::StatementParser::new().parse(&line) {
+        let mut stmt = match calc::StatementParser::new().parse(&line) {
             Ok(stmt) => stmt,
             Err(e) => {
                 println!("Invalid statement: {}", e);
@@ -29,7 +29,11 @@ fn main() -> Result<(), Box<Error>> {
         };
 
         match stmt {
-            Statement::Assign(name, expr) => {
+            Statement::Assign(name, mut expr) => {
+                if let Err(e) = resolve_initial(&mut expr, &vars) {
+                    println!("{}", e);
+                    continue;
+                }
                 vars.insert(name, expr);
             }
             Statement::Print(expr) => {
