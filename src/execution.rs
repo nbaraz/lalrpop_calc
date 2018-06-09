@@ -17,7 +17,10 @@ fn resolve_inner<'this>(
         Expr::Ident(name) => {
             let existed = !resolving.insert(&name);
             if existed {
-                Err(ExecError::Recursion { identifier: name.clone() })
+                Err(ExecError::Recursion {
+                    identifier: name.clone(),
+                    expr: vars[name].clone(),
+                })
             } else {
                 let res = vars
                     .get(*&name)
@@ -67,6 +70,9 @@ pub enum ExecError {
     #[fail(display = "Tried to divide {} by zero", dividend)]
     DivisionByZero { dividend: i32 },
 
-    #[fail(display = "Identifier `{}` is defined recursively", identifier)]
-    Recursion { identifier: String },
+    #[fail(display = "Identifier `{}` is defined recursively as `{}`", identifier, expr)]
+    Recursion {
+        identifier: String,
+        expr: Expr,
+    },
 }
