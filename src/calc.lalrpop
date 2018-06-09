@@ -9,12 +9,9 @@ pub Statement: Statement = {
     "?" <Expr> => Statement::Repr(<>),
 };
 
-pub Expr: Expr = {
-    "resolve" <Expr> => Expr::Resolve(Box::new(<>)),
-    LazyExpr,
 };
 
-LazyExpr = Tier<ExprOp, Factor>;
+Expr = Tier<ExprOp, Factor>;
 Factor = Tier<FactorOp, Term>;
 
 Tier<Op, NextTier>: Expr = {
@@ -35,6 +32,7 @@ pub Term: Expr = {
     <Num> => Expr::Num(<>),
     <Ident> => Expr::Ident(<>),
     "(" <Expr> ")",
+    "resolve" <Term> => Expr::Resolve(Box::new(<>)),
 };
 
 Num: i32 = <r"[0-9]+"> => i32::from_str(<>).unwrap();
