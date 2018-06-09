@@ -1,14 +1,19 @@
 use std::str::FromStr;
-use ast::{Statement, Expr, OpCode};
+use ast::{Statement, Expr, OpCode, IdentReprMode};
 
 grammar;
 
 pub Statement: Statement = {
     <p:Ident> "=" <e: Expr> => Statement::Assign(p, e),
     <Expr> => Statement::Print(<>),
-    "?" <Expr> => Statement::Repr(<>),
+    "?" <Expr> => Statement::Repr(IdentReprMode::Mixed, <>),
+    <ReprMode> "?" <Expr> => Statement::Repr(<>),
 };
 
+ReprMode: IdentReprMode = {
+    "e" => IdentReprMode::Eager,
+    "l" => IdentReprMode::Lazy,
+    "m" => IdentReprMode::Mixed,
 };
 
 Expr = Tier<ExprOp, Factor>;

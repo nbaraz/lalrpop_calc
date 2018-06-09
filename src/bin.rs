@@ -47,8 +47,8 @@ fn main() -> Result<(), Box<Error>> {
                     }
                 };
             }
-            Statement::Repr(expr) => {
-                println!("{}", ast::repr_expr(&expr, &vars));
+            Statement::Repr(repr_mode, expr) => {
+                println!("{}", ast::repr_expr(&expr, &vars, repr_mode));
             }
         };
     }
